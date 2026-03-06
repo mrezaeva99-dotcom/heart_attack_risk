@@ -1,0 +1,31 @@
+# Виртуальное окружение
+venv/
+env/
+ENV/
+
+# Файлы Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Данные (если не хочешь загружать большие файлы в репозиторий)
+data/*.csv
+data/*.xlsx
+models/*.pkl
+models/*.joblib
+models/*.cbm
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
