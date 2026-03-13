@@ -1,9 +1,9 @@
-import os           # Для работы с путями к файлам
-import pickle       # Для загрузки scaler и feature_names
-import pandas as pd # Для обработки таблиц
-import numpy as np  # Для математических операций
-import io           # Для работы с потоками данных (чтение загруженных файлов)
-import uvicorn      # Для запуска сервера
+import os           
+import pickle       
+import pandas as pd 
+import numpy as np  
+import io           
+import uvicorn     
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
@@ -51,7 +51,7 @@ class HeartAttackPredictor:
         to_drop = ['Heart Attack Risk (Binary)', 'Unnamed: 0', 'id']
         data = data.drop(columns=[c for c in to_drop if c in data.columns], errors='ignore')
         
-        # Пол (исправляем на _encoded как в скейлере)
+        # Пол 
         if 'Gender' in data.columns:
             g_map = {'Male': 0, '1.0': 0, '1': 0, 'Female': 1, '0.0': 1, '0': 1}
             data['Gender_encoded'] = data['Gender'].astype(str).str.strip().map(g_map).fillna(0).astype(int)
@@ -76,7 +76,6 @@ class HeartAttackPredictor:
         # Получаем вероятности
         probs = self.model.predict_proba(processed_data)[:, 1]
         
-        # Вывод в консоль для анализа "почему везде 1"
         print(f"\n--- DEBUG INFO ---")
         print(f"Вероятности (первые 5): {probs[:5]}")
         print(f"Средняя вероятность: {probs.mean():.4f}")
@@ -88,7 +87,7 @@ class HeartAttackPredictor:
     
 # ==================== 3. ИНИЦИАЛИЗАЦИЯ И LIFESPAN ====================
 
-# 1. Путь к папке, где лежат твои .cbm и .pkl файлы
+# 1. Путь к папке
 MODEL_DIR = "C:/Users/Rodion/Desktop/heart_attack_risk/models/"
 
 # 2. Создаем экземпляр нашего классного предиктора
@@ -97,14 +96,11 @@ predictor = HeartAttackPredictor(MODEL_DIR)
 # 3. Механизм управления жизненным циклом приложения
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Этот блок срабатывает ОДИН РАЗ при старте сервера
     try:
         predictor.load_assets()
     except Exception as e:
         print(f"Критическая ошибка при старте: {e}")
     yield
-    # Здесь можно прописать действия при выключении (например, закрытие БД), 
-    # но нам пока ничего не нужно.
 
 # 4. Создаем само приложение
 app = FastAPI(
@@ -219,16 +215,14 @@ async def serve_home():
 async def predict_json(file: UploadFile = File(...)):
     try:
         content = await file.read()
-        # Пытаемся декодировать с учетом BOM (Excel любит utf-8-sig)
         try:
             decoded_content = content.decode('utf-8-sig')
         except UnicodeDecodeError:
             decoded_content = content.decode('cp1251')
             
-        # sep=None заставляет pandas самого определить , или ;
         df = pd.read_csv(io.StringIO(decoded_content), sep=None, engine='python')
         
-        print(f"DEBUG: Получены колонки: {df.columns.tolist()}") # Увидишь в консоли
+        print(f"DEBUG: Получены колонки: {df.columns.tolist()}") 
         
         ids, preds = predictor.predict(df)
         
@@ -241,7 +235,7 @@ async def predict_json(file: UploadFile = File(...)):
         }
     except Exception as e:
         import traceback
-        print(traceback.format_exc()) # ВАЖНО: Это напечатает реальную ошибку в консоль!
+        print(traceback.format_exc()) 
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/download_csv")
@@ -259,7 +253,6 @@ async def predict_csv(file: UploadFile = File(...)):
         ids, preds = predictor.predict(df)
         
         # Создаем DataFrame для выгрузки
-        # ВАЖНО: убедись, что колонки называются именно так, как просили в ТЗ
         result_df = pd.DataFrame({
             "id": ids,
             "prediction": preds
