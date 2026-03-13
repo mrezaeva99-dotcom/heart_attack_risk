@@ -2,7 +2,7 @@
   "model_type": "CatBoost",
   "balanced": true,
   "roc_auc": 0.5255360704152656,
-  "chosen_threshold": 0.35,
+  "chosen_threshold": 0.4,
   "final_metrics": {
     "precision": 0.35701598579040855,
     "recall": 1.0,
